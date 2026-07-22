@@ -5,7 +5,7 @@
   "author": "thebiggestwoop",
   "icon": "/owl-trackers-logo.png",
   "background_url": "/src/background/background.html",
-  "description": "Token HP/Structure/Heat bars for Lancer, with GM-only hidden values.",
+  "description": "Trackers that are awesome. Initiative HP and everything else for Ascension and Lancer and whatever. The best extension ever made.",
   "action": {
     "title": "Awesome Trackers",
     "icon": "/owl-trackers-logo-outline.svg",
