@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Hand-vectorized approximation of the "sneaky owl" logo, for use as a
+     small toolbar/context-menu icon where a raster image wouldn't scale
+     cleanly. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36" id="icon">
+  <circle cx="18" cy="18" r="18" fill="#ffcc4d" />
+  <g fill="#66471b">
+    <rect x="-5" y="-1.7" width="10" height="3.4" rx="1.7" transform="translate(11 14) rotate(-18)" />
+    <rect x="-5" y="-1.7" width="10" height="3.4" rx="1.7" transform="translate(25 14) rotate(18)" />
+    <path d="M 13,22.5 C 14,20.5 16,20.5 18,22.5 C 20,20.5 22,20.5 23,22.5 C 22,24.5 20,24.8 18,23.3 C 16,24.8 14,24.5 13,22.5 Z" />
+  </g>
+</svg>
