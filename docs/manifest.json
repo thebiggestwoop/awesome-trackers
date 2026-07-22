@@ -5,7 +5,7 @@
   "author": "thebiggestwoop",
   "icon": "/owl-trackers-logo.png",
   "background_url": "/src/background/background.html",
-  "description": "Trackers that are awesome. Initiative HP and everything else for Ascension and Lancer and whatever. The best extension ever made.",
+  "description": "Trackers that are awesome. For Lancer and Ascension and anything else.",
   "action": {
     "title": "Awesome Trackers",
     "icon": "/owl-trackers-logo-outline.svg",
