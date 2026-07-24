@@ -1,6 +1,7 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 import { Tracker, isTracker, TRACKER_METADATA_ID } from "./trackerHelpersBasic";
+import { isSegmentSettings } from "./isSegmentSettings";
 
 /////////////////////////////////////////////////////////////////////
 // Scene default tracker presets -- named sets of default trackers (e.g.
@@ -96,6 +97,32 @@ export async function installPreset(name: string, trackers: Tracker[]) {
 
   await writePresetsToScene({ ...presets, [finalName]: trackers });
   await writeActivePresetNameToScene(finalName);
+}
+
+const SEGMENT_SETTINGS_METADATA_ID = "segmentSettings";
+
+/** Merges the given tracker-name -> segment-count entries into the scene's
+ * existing segment settings, overwriting any entry that already exists for
+ * the same tracker name and leaving every other tracker's entry untouched.
+ * Used by the built-in Lancer preset to set its own default segment counts
+ * (4 for HP, 2 for Heat) without clobbering segment settings a GM may have
+ * configured separately for other trackers. Doesn't touch the scene-wide
+ * "Enable Segments" toggle itself -- that's a separate, more disruptive
+ * switch left for the GM to flip on deliberately. */
+export async function mergeSegmentSettings(entries: [string, number][]) {
+  const sceneMetadata = await OBR.scene.getMetadata();
+  const raw = sceneMetadata[getPluginId(SEGMENT_SETTINGS_METADATA_ID)];
+  const existing = isSegmentSettings(raw) ? raw : [];
+
+  const namesToReplace = new Set(entries.map(([name]) => name));
+  const merged = [
+    ...existing.filter(([name]) => !namesToReplace.has(name)),
+    ...entries,
+  ];
+
+  await OBR.scene.setMetadata({
+    [getPluginId(SEGMENT_SETTINGS_METADATA_ID)]: merged,
+  });
 }
 
 /** Delete a preset. If it was the active one, switches active to whatever

@@ -7,7 +7,7 @@ import {
   TRACKERS_ABOVE_METADATA_ID,
   BAR_HEIGHT_METADATA_ID,
   SEGMENTS_ENABLED_METADATA_ID,
-  NAME_TAGS_METADATA_ID,
+  HIDE_LABEL_METADATA_ID,
   HIDE_ENEMY_TRACKERS_METADATA_ID,
 } from "./sceneMetadataHelpers";
 import { useOwlbearStore } from "./useOwlbearStore";
@@ -28,9 +28,7 @@ export function useSceneSettingsStoreSync() {
   const setSegmentsEnabled = useSceneSettingsStore(
     (state) => state.setSegmentsEnabled,
   );
-  const setNameTagsEnabled = useSceneSettingsStore(
-    (state) => state.setNameTagsEnabled,
-  );
+  const setHideLabel = useSceneSettingsStore((state) => state.setHideLabel);
   const setHideEnemyTrackers = useSceneSettingsStore(
     (state) => state.setHideEnemyTrackers,
   );
@@ -48,9 +46,7 @@ export function useSceneSettingsStoreSync() {
     setSegmentsEnabled(
       readBooleanFromMetadata(metadata, SEGMENTS_ENABLED_METADATA_ID),
     );
-    setNameTagsEnabled(
-      readBooleanFromMetadata(metadata, NAME_TAGS_METADATA_ID),
-    );
+    setHideLabel(readBooleanFromMetadata(metadata, HIDE_LABEL_METADATA_ID));
     setHideEnemyTrackers(
       readBooleanFromMetadata(metadata, HIDE_ENEMY_TRACKERS_METADATA_ID),
     );

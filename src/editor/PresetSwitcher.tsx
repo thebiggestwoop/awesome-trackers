@@ -7,6 +7,7 @@ import {
   createPreset,
   deletePreset,
   installPreset,
+  mergeSegmentSettings,
 } from "../trackerHelpersScene";
 import {
   createLancerPresetTrackers,
@@ -89,7 +90,13 @@ export default function PresetSwitcher(): React.JSX.Element {
       <div className="flex flex-row gap-1">
         <button
           className="min-w-0 flex-1 truncate rounded-lg border-none bg-white/30 px-3 py-1 text-sm text-text-primary no-underline hover:bg-white/20 dark:bg-black/15 dark:text-text-primary-dark dark:hover:bg-black/35"
-          onClick={() => installPreset("Lancer", createLancerPresetTrackers())}
+          onClick={() => {
+            installPreset("Lancer", createLancerPresetTrackers());
+            mergeSegmentSettings([
+              ["HP", 4],
+              ["Heat", 2],
+            ]);
+          }}
         >
           Add Lancer Preset
         </button>

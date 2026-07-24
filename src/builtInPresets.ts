@@ -16,6 +16,8 @@ export function createLancerPresetTrackers(): Tracker[] {
       name: "HP",
       value: 0,
       max: 0,
+      barStyle: "parallelogram",
+      numberFont: "monospace",
     },
     {
       id: createId(),
@@ -25,16 +27,20 @@ export function createLancerPresetTrackers(): Tracker[] {
       value: 0,
       max: 0,
       hideWhenZero: true,
+      barStyle: "parallelogram",
+      numberFont: "monospace",
     },
     {
       id: createId(),
       variant: "counter",
-      color: "#3a30ff",
+      color: "#665eff",
       name: "Structure",
       value: 0,
       hideWhenZero: true,
       alwaysVisible: true,
       corner: "BOTTOM_LEFT",
+      bubbleShape: "wide",
+      numberFont: "monospace",
     },
     {
       id: createId(),
@@ -45,6 +51,8 @@ export function createLancerPresetTrackers(): Tracker[] {
       hideWhenZero: true,
       alwaysVisible: true,
       corner: "BOTTOM_RIGHT",
+      bubbleShape: "wide-reversed",
+      numberFont: "monospace",
     },
     {
       id: createId(),
@@ -54,7 +62,9 @@ export function createLancerPresetTrackers(): Tracker[] {
       value: 0,
       hideWhenZero: true,
       hideValueFromPlayers: true,
-      corner: "TOP_LEFT",
+      corner: "BOTTOM_LEFT",
+      bubbleShape: "wide",
+      numberFont: "monospace",
     },
     {
       id: createId(),
@@ -64,7 +74,9 @@ export function createLancerPresetTrackers(): Tracker[] {
       value: 0,
       hideWhenZero: true,
       alwaysVisible: true,
-      corner: "TOP_RIGHT",
+      corner: "BOTTOM_RIGHT",
+      bubbleShape: "wide-reversed",
+      numberFont: "monospace",
     },
   ];
 }

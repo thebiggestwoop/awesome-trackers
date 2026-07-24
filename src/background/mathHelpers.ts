@@ -159,6 +159,39 @@ export function createRoundedRectangle(
   ];
 }
 
+/**
+ * Generates a parallelogram (angled bar) outline for Owlbear Rodeo -- used
+ * for the Lancer preset's bars instead of the default rounded rectangle.
+ * The fill boundary is a second edge parallel to the bar's own left/right
+ * edges (not a vertical cut), so at fill 0 it coincides exactly with the
+ * left edge -- collapsing to zero area instead of leaving a sliver -- and
+ * grows smoothly into the full parallelogram at fill 1. The whole shape is
+ * centered on the caller's [0, maxLength] span (shifted by half the skew)
+ * so it doesn't visually drift toward whichever side it leans.
+ * @param maxLength - length of the parallelogram with fill of 1.
+ * @param height - Height of the parallelogram.
+ * @param skew - Horizontal offset of the top edge relative to the bottom
+ * edge (negative leans the top to the left).
+ * @param fill - Portion of the parallelogram to draw (between 0 and 1).
+ * @returns Array of points generated along the edge of the parallelogram.
+ */
+export function createParallelogram(
+  maxLength: number,
+  height: number,
+  skew: number,
+  fill = 1,
+): Vector2[] {
+  const centerOffset = -skew / 2;
+  const fillLength = Math.min(Math.max(fill, 0), 1) * maxLength;
+
+  return [
+    { x: centerOffset, y: height },
+    { x: centerOffset + fillLength, y: height },
+    { x: centerOffset + fillLength + skew, y: 0 },
+    { x: centerOffset + skew, y: 0 },
+  ];
+}
+
 /** Generates a curve in the shape of an arc of a circle for Owlbear Rodeo.
  * @param center - Center coordinates of the circle.
  * @param radius - Radius of the circle from which the arc is taken.

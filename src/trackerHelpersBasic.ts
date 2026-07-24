@@ -39,6 +39,20 @@ export type Tracker = {
   // Anchors a bubble-type tracker (value/counter/checkbox) to a specific
   // corner of the token instead of the default sequential stacking order.
   corner?: Corner;
+  // Renders a bubble-type tracker (value/counter/checkbox/counter-with-temp)
+  // as a rectangle instead of the default circle -- "square" is diameter x
+  // diameter; "wide"/"wide-reversed" are a rectangle split into an icon
+  // half and a value half (see BUBBLE_ICONS/createTrackerBubble) -- "wide"
+  // puts the icon on the left and the value on the right, "wide-reversed"
+  // mirrors that (icon right, value left), for a tracker anchored to the
+  // opposite corner. Currently only set by the Lancer preset's Structure
+  // and Stress trackers, not a general per-tracker option exposed in the
+  // editor.
+  bubbleShape?: "square" | "wide" | "wide-reversed";
+  // Font for this tracker's on-map value text (bar value/max, or bubble
+  // count) -- falls back to the default font when unset. Currently only
+  // set by the Lancer preset.
+  numberFont?: "monospace";
 } & (
   | {
       variant: "value";
@@ -48,6 +62,10 @@ export type Tracker = {
       variant: "value-max";
       value: number;
       max: number;
+      // Renders the bar as an angled parallelogram instead of the default
+      // rounded rectangle -- currently only set by the Lancer preset, not
+      // a general per-tracker option exposed in the editor.
+      barStyle?: "parallelogram";
     }
   | {
       variant: "checkbox";
@@ -128,6 +146,17 @@ export function isTracker(
   )
     return false;
 
+  if (
+    tracker.bubbleShape !== undefined &&
+    tracker.bubbleShape !== "square" &&
+    tracker.bubbleShape !== "wide" &&
+    tracker.bubbleShape !== "wide-reversed"
+  )
+    return false;
+
+  if (tracker.numberFont !== undefined && tracker.numberFont !== "monospace")
+    return false;
+
   if (tracker.variant === "value") {
     if (tracker.value === undefined) return false;
     if (typeof tracker.value !== "number") return false;
@@ -149,6 +178,8 @@ export function isTracker(
     if (typeof tracker.value !== "number") return false;
     if (tracker.max === undefined) return false;
     if (typeof tracker.max !== "number") return false;
+    if (tracker.barStyle !== undefined && tracker.barStyle !== "parallelogram")
+      return false;
   } else if (tracker.variant === "checkbox") {
     if (tracker.checked === undefined) return false;
     if (typeof tracker.checked !== "boolean") return false;

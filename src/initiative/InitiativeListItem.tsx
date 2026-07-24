@@ -23,6 +23,9 @@ export default function InitiativeListItem({
 
   const anyActive = !entry.defeated && entry.slots.some((slot) => slot.active);
   const allSpent = entry.slots.every((slot) => !slot.ready && !slot.active);
+  // Players can see enemy activation state but not change it -- only the
+  // GM (or the party's own entries) can toggle ready/active.
+  const canToggleActivation = role === "GM" || entry.group === "PARTY";
 
   return (
     <div
@@ -65,11 +68,22 @@ export default function InitiativeListItem({
               key={slot.id}
               Icon={slot.ready ? CheckedCircle : UncheckedCircle}
               className={cn(
-                "size-[28px]",
+                "size-[28px] disabled:opacity-30",
                 !slot.ready && !slot.active && "opacity-50",
               )}
-              onClick={() => onReadyChange(slot.id, !slot.ready)}
-              title={slot.ready ? "Mark as acted" : "Mark as ready"}
+              disabled={!canToggleActivation}
+              onClick={
+                canToggleActivation
+                  ? () => onReadyChange(slot.id, !slot.ready)
+                  : undefined
+              }
+              title={
+                canToggleActivation
+                  ? slot.ready
+                    ? "Mark as acted"
+                    : "Mark as ready"
+                  : "Only the GM can toggle enemy activations"
+              }
             />
           ))}
         </div>

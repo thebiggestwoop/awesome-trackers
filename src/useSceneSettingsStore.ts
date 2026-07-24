@@ -5,14 +5,14 @@ interface SceneSettingsState {
   trackersAboveToken: boolean;
   barHeightIsReduced: boolean;
   segmentsEnabled: boolean;
-  nameTagsEnabled: boolean;
+  hideLabel: boolean;
   hideEnemyTrackers: boolean;
 
   setVerticalOffset: (verticalOffset: number) => void;
   setTrackersAboveToken: (trackersAboveToken: boolean) => void;
   setBarHeightIsReduced: (barHeightIsReduced: boolean) => void;
   setSegmentsEnabled: (segmentsEnabled: boolean) => void;
-  setNameTagsEnabled: (nameTagsEnabled: boolean) => void;
+  setHideLabel: (hideLabel: boolean) => void;
   setHideEnemyTrackers: (hideEnemyTrackers: boolean) => void;
 }
 
@@ -21,7 +21,7 @@ export const useSceneSettingsStore = create<SceneSettingsState>()((set) => ({
   trackersAboveToken: false,
   barHeightIsReduced: false,
   segmentsEnabled: false,
-  nameTagsEnabled: false,
+  hideLabel: false,
   hideEnemyTrackers: false,
 
   setVerticalOffset: (verticalOffset) =>
@@ -32,8 +32,7 @@ export const useSceneSettingsStore = create<SceneSettingsState>()((set) => ({
     set((state) => ({ ...state, barHeightIsReduced })),
   setSegmentsEnabled: (segmentsEnabled) =>
     set((state) => ({ ...state, segmentsEnabled })),
-  setNameTagsEnabled: (nameTagsEnabled) =>
-    set((state) => ({ ...state, nameTagsEnabled })),
+  setHideLabel: (hideLabel) => set((state) => ({ ...state, hideLabel })),
   setHideEnemyTrackers: (hideEnemyTrackers) =>
     set((state) => ({ ...state, hideEnemyTrackers })),
 }));

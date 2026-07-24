@@ -8,11 +8,15 @@ import {
   getDefeatedLabelId,
   getBarItemIds,
   getBarTextId,
+  getBarIconId,
   getBubbleItemIds,
   getBubbleTextId,
+  getBubbleIconId,
   getImageBubbleItemIds,
   REDUCED_BAR_HEIGHT,
   BUBBLE_DIAMETER,
+  BAR_ICONS,
+  BUBBLE_ICONS,
   createNameTag,
   getNameTagId,
 } from "./compoundItemHelpers";
@@ -33,7 +37,7 @@ import { BubblePosition } from "./trackerPositionHelper";
 import {
   BAR_HEIGHT_METADATA_ID,
   SEGMENTS_ENABLED_METADATA_ID,
-  NAME_TAGS_METADATA_ID,
+  HIDE_LABEL_METADATA_ID,
   TRACKERS_ABOVE_METADATA_ID,
   VERTICAL_OFFSET_METADATA_ID,
   HIDE_ENEMY_TRACKERS_METADATA_ID,
@@ -66,7 +70,7 @@ let trackersAboveToken = false;
 let barHeightIsReduced = false;
 let segmentsEnabled = false;
 let segmentSettings = new Map<string, number>();
-let nameTagsEnabled = false;
+let hideLabel = false;
 let hideEnemyTrackers = false;
 
 // How far down past the token's top edge the name tag dips -- tune this up
@@ -117,14 +121,14 @@ async function getGlobalSettings(sceneMetadata?: Metadata): Promise<boolean> {
     newTrackersAboveToken,
     newBarHeightIsReduced,
     newSegmentsEnabled,
-    newNameTagsEnabled,
+    newHideLabel,
     newHideEnemyTrackers,
   ] = [
     readNumberFromMetadata(sceneMetadata, VERTICAL_OFFSET_METADATA_ID),
     readBooleanFromMetadata(sceneMetadata, TRACKERS_ABOVE_METADATA_ID),
     readBooleanFromMetadata(sceneMetadata, BAR_HEIGHT_METADATA_ID),
     readBooleanFromMetadata(sceneMetadata, SEGMENTS_ENABLED_METADATA_ID),
-    readBooleanFromMetadata(sceneMetadata, NAME_TAGS_METADATA_ID),
+    readBooleanFromMetadata(sceneMetadata, HIDE_LABEL_METADATA_ID),
     readBooleanFromMetadata(sceneMetadata, HIDE_ENEMY_TRACKERS_METADATA_ID),
   ];
 
@@ -133,14 +137,14 @@ async function getGlobalSettings(sceneMetadata?: Metadata): Promise<boolean> {
     newTrackersAboveToken !== trackersAboveToken ||
     newBarHeightIsReduced !== barHeightIsReduced ||
     newSegmentsEnabled !== segmentsEnabled ||
-    newNameTagsEnabled !== nameTagsEnabled ||
+    newHideLabel !== hideLabel ||
     newHideEnemyTrackers !== hideEnemyTrackers;
 
   verticalOffset = newVerticalOffset;
   trackersAboveToken = newTrackersAboveToken;
   barHeightIsReduced = newBarHeightIsReduced;
   segmentsEnabled = newSegmentsEnabled;
-  nameTagsEnabled = newNameTagsEnabled;
+  hideLabel = newHideLabel;
   hideEnemyTrackers = newHideEnemyTrackers;
 
   return doRefresh;
@@ -400,12 +404,16 @@ const CORNER_MARGIN = 2;
 
 /** Positions a bubble anchored to a specific corner of the token, instead
  * of the default sequential stacking order. Additional bubbles sharing the
- * same corner stack inward along that corner's top/bottom edge. */
+ * same corner stack inward along that corner's edge -- horizontally by
+ * default, or vertically (stacking away from the corner's own top/bottom
+ * edge) for the Lancer preset's "wide" bubbles, since those are wider than
+ * they are tall and would overlap/overflow if stacked side by side. */
 function getCornerBubblePosition(
   rawCenter: { x: number; y: number },
   bounds: { width: number; height: number },
   corner: Corner,
   indexInCorner: number,
+  stackVertically = false,
 ): { x: number; y: number } {
   const inset = BUBBLE_DIAMETER / 2 + CORNER_MARGIN;
   const stackStep = BUBBLE_DIAMETER + CORNER_MARGIN;
@@ -416,10 +424,16 @@ function getCornerBubblePosition(
   const baseX = isLeft
     ? rawCenter.x - bounds.width / 2 + inset
     : rawCenter.x + bounds.width / 2 - inset;
-  const y = isTop
+  const baseY = isTop
     ? rawCenter.y - bounds.height / 2 + inset
     : rawCenter.y + bounds.height / 2 - inset;
-  const x = baseX + (isLeft ? 1 : -1) * stackStep * indexInCorner;
+
+  const x = stackVertically
+    ? baseX
+    : baseX + (isLeft ? 1 : -1) * stackStep * indexInCorner;
+  const y = stackVertically
+    ? baseY + (isTop ? 1 : -1) * stackStep * indexInCorner
+    : baseY;
 
   return { x, y };
 }
@@ -541,10 +555,14 @@ function updateItemTrackers(
               barHeightIsReduced,
               !playerViewingHiddenToken,
               segments,
+              sceneDpi,
             ),
           );
           if (playerViewingHiddenToken) {
             deleteItemsArray.push(getBarTextId(item.id, index));
+          }
+          if (tracker.name === undefined || !(tracker.name in BAR_ICONS)) {
+            deleteItemsArray.push(getBarIconId(item.id, index));
           }
         }
       });
@@ -625,12 +643,34 @@ function updateItemTrackers(
           // Corner-anchored bubbles are pinned to the token's own
           // bounding box, independent of the vertical-offset nudge that
           // only makes sense for content stacking away from the token.
-          const position = tracker.corner
+          const isWideBubble =
+            tracker.bubbleShape === "wide" ||
+            tracker.bubbleShape === "wide-reversed";
+          // cornerCounters stays keyed by the tracker's real corner (so
+          // stacking bookkeeping isn't affected), but when bars move above
+          // the token, bottom-corner bubbles need to flip to the token's
+          // top edge too -- that's where the bar stack now sits, and the
+          // whole point of anchoring a bubble to "BOTTOM_LEFT" is to stay
+          // adjacent to wherever the bar stack actually is.
+          const indexInCorner = tracker.corner
+            ? cornerCounters[tracker.corner]++
+            : 0;
+          const flipToTop =
+            trackersAboveToken &&
+            (tracker.corner === "BOTTOM_LEFT" ||
+              tracker.corner === "BOTTOM_RIGHT");
+          const effectiveCorner: Corner | undefined = flipToTop
+            ? tracker.corner === "BOTTOM_LEFT"
+              ? "TOP_LEFT"
+              : "TOP_RIGHT"
+            : tracker.corner;
+          const position = effectiveCorner
             ? getCornerBubblePosition(
                 rawCenter,
                 bounds,
-                tracker.corner,
-                cornerCounters[tracker.corner]++,
+                effectiveCorner,
+                indexInCorner,
+                isWideBubble,
               )
             : bubblePosition.getNew();
 
@@ -640,9 +680,17 @@ function updateItemTrackers(
             (tracker.corner === "BOTTOM_LEFT" ||
               tracker.corner === "BOTTOM_RIGHT")
           ) {
+            // A vertically-stacked ("wide") bubble further from the
+            // corner's edge needs its own ceiling pushed up by the same
+            // amount its stacking already pushed it -- otherwise clamping
+            // would collapse every stacked bubble at this corner onto the
+            // exact same position once the bar stack is tall enough.
+            const stackOffset = isWideBubble
+              ? indexInCorner * (BUBBLE_DIAMETER + CORNER_MARGIN)
+              : 0;
             position.y = Math.min(
               position.y,
-              barStackTopY - BUBBLE_DIAMETER / 2,
+              barStackTopY - BUBBLE_DIAMETER / 2 - stackOffset,
             );
           }
 
@@ -655,10 +703,14 @@ function updateItemTrackers(
               { x: position.x, y },
               index,
               showText,
+              sceneDpi,
             ),
           );
           if (!showText) {
             deleteItemsArray.push(getBubbleTextId(item.id, index));
+          }
+          if (tracker.name === undefined || !(tracker.name in BUBBLE_ICONS)) {
+            deleteItemsArray.push(getBubbleIconId(item.id, index));
           }
         }
       });
@@ -682,13 +734,26 @@ function updateItemTrackers(
     // Always shown to everyone regardless of hidden state -- a token's
     // identity isn't secret just because its exact numbers are.
     const displayName = item.text.plainText || item.name;
-    if (nameTagsEnabled && displayName !== "") {
+    if (!hideLabel && displayName !== "") {
       const nameTagPosition = {
         x: rawCenter.x,
         y: rawCenter.y - bounds.height / 2 + NAME_TAG_OVERLAP - verticalOffset,
       };
+      // A token using the Lancer preset has at least one tracker set to
+      // the monospace font -- match the name tag's font/background to
+      // the Lancer theme too.
+      const isLancerTheme = trackers.some(
+        (tracker) => tracker.numberFont === "monospace",
+      );
       addItemsArray.push(
-        ...createNameTag(item, sceneDpi, displayName, nameTagPosition, "DOWN"),
+        ...createNameTag(
+          item,
+          sceneDpi,
+          displayName,
+          nameTagPosition,
+          "DOWN",
+          isLancerTheme,
+        ),
       );
     } else {
       deleteItemsArray.push(getNameTagId(item.id));

@@ -8,7 +8,7 @@ import Input from "../components/Input";
 import {
   BAR_HEIGHT_METADATA_ID,
   SEGMENTS_ENABLED_METADATA_ID,
-  NAME_TAGS_METADATA_ID,
+  HIDE_LABEL_METADATA_ID,
   TRACKERS_ABOVE_METADATA_ID,
   VERTICAL_OFFSET_METADATA_ID,
   HIDE_ENEMY_TRACKERS_METADATA_ID,
@@ -53,12 +53,8 @@ export function SceneSettings(): React.JSX.Element {
     (state) => state.setSegmentsEnabled,
   );
 
-  const nameTagsEnabled = useSceneSettingsStore(
-    (state) => state.nameTagsEnabled,
-  );
-  const setNameTagsEnabled = useSceneSettingsStore(
-    (state) => state.setNameTagsEnabled,
-  );
+  const hideLabel = useSceneSettingsStore((state) => state.hideLabel);
+  const setHideLabel = useSceneSettingsStore((state) => state.setHideLabel);
 
   const hideEnemyTrackers = useSceneSettingsStore(
     (state) => state.hideEnemyTrackers,
@@ -185,16 +181,16 @@ export function SceneSettings(): React.JSX.Element {
             }}
           ></ToggleButton>
 
-          {/* Name tags */}
+          {/* Hide label */}
           <h2 className="justify-self-start text-sm text-text-primary dark:text-text-primary-dark">
-            Show name tags
+            Hide label
           </h2>
           <ToggleButton
-            isChecked={nameTagsEnabled}
+            isChecked={hideLabel}
             changeHandler={(isChecked: boolean) => {
-              setNameTagsEnabled(isChecked);
+              setHideLabel(isChecked);
               OBR.scene.setMetadata({
-                [getPluginId(NAME_TAGS_METADATA_ID)]: isChecked,
+                [getPluginId(HIDE_LABEL_METADATA_ID)]: isChecked,
               });
             }}
           ></ToggleButton>

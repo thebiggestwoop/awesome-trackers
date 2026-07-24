@@ -5,15 +5,16 @@ export const VERTICAL_OFFSET_METADATA_ID = "verticalOffset";
 export const TRACKERS_ABOVE_METADATA_ID = "trackersAboveToken";
 export const BAR_HEIGHT_METADATA_ID = "barHeightIsReduced";
 export const SEGMENTS_ENABLED_METADATA_ID = "segmentsEnabled";
-export const NAME_TAGS_METADATA_ID = "nameTagsEnabled";
+export const HIDE_LABEL_METADATA_ID = "hideLabel";
 export const HIDE_ENEMY_TRACKERS_METADATA_ID = "hideEnemyTrackers";
 
 export function readBooleanFromMetadata(
   metadata: Metadata,
   key: string,
+  defaultValue = false,
 ): boolean {
   const value = metadata[getPluginId(key)];
-  if (typeof value !== "boolean") return false;
+  if (typeof value !== "boolean") return defaultValue;
   return value;
 }
 
